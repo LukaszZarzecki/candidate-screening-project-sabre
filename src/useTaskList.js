@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 
-const TASK_LOCALSTORAGE_KEY = 'TASK_LOCALSTORAGE';
-
-const useTaskList = () => {
+const useTaskList = (storage = localStorage, key = 'TASK_LOCALSTORAGE') => {
     const [list, setList] = useState([]);
 
     useEffect(() => {
-        const listRaw = localStorage.getItem(TASK_LOCALSTORAGE_KEY);
+        const listRaw = storage.getItem(key);
         if (!listRaw) {
             return;
         }
@@ -14,16 +12,17 @@ const useTaskList = () => {
         try {
             const listParsed = JSON.parse(listRaw);
 
-            setList(listParsed);
+            if (Array.isArray(listParsed)) {
+                setList(listParsed);
+            }
         } catch (e) {
             return;
         }
-    }, []);
+    }, [storage, key]);
 
     useEffect(() => {
-        console.log(list);
-        localStorage.setItem(TASK_LOCALSTORAGE_KEY, JSON.stringify(list));
-    }, [list]);
+        storage.setItem(key, JSON.stringify(list));
+    }, [list, storage, key]);
 
     const addTask = newTask => {
         const newList = [...list, newTask];
